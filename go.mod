@@ -1,9 +1,10 @@
-module github.com/niklasfasching/go-org
+module github.com/Ladicle/go-org
 
 go 1.16
 
 require (
 	github.com/alecthomas/chroma v0.8.2
+	github.com/niklasfasching/go-org v1.5.0
 	github.com/pmezard/go-difflib v1.0.0
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 )
