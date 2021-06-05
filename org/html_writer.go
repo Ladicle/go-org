@@ -128,7 +128,13 @@ func (w *HTMLWriter) WriteBlock(b Block) {
 			lang = strings.ToLower(b.Parameters[0])
 		}
 		content = w.HighlightCodeBlock(content, lang, false)
-		w.WriteString(fmt.Sprintf("<div class=\"src src-%s\">\n%s\n</div>\n", lang, content))
+		var wrapperStart, wrapperEnd string
+		switch {
+		case params[":details"] == "t":
+			wrapperStart, wrapperEnd = "<details>\n", "</details>\n"
+		}
+		w.WriteString(fmt.Sprintf("%s<div class=\"src src-%s\">\n%s\n</div>\n%s",
+			wrapperStart, lang, content, wrapperEnd))
 	case "EXAMPLE":
 		w.WriteString(`<pre class="example">` + "\n" + html.EscapeString(content) + "\n</pre>\n")
 	case "EXPORT":
@@ -496,7 +502,11 @@ func (w *HTMLWriter) WriteNodeWithMeta(n NodeWithMeta) {
 			}
 			caption += w.WriteNodesAsString(ns...)
 		}
-		out = fmt.Sprintf("<figure>\n%s<figcaption>\n%s\n</figcaption>\n</figure>\n", out, caption)
+		if strings.HasPrefix(out, "<details>") {
+			out = fmt.Sprintf("<details>\n<summary>%s</summary>\n%s\n", caption, strings.TrimPrefix(out, "<details>"))
+		} else {
+			out = fmt.Sprintf("<figure>\n%s<figcaption>\n%s\n</figcaption>\n</figure>\n", out, caption)
+		}
 	}
 	w.WriteString(out)
 }
