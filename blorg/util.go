@@ -9,7 +9,7 @@ import (
 	"github.com/alecthomas/chroma/formatters/html"
 	"github.com/alecthomas/chroma/lexers"
 	"github.com/alecthomas/chroma/styles"
-	"github.com/niklasfasching/go-org/org"
+	"github.com/Ladicle/go-org/org"
 )
 
 var snakeCaseRegexp = regexp.MustCompile(`(^[A-Za-z])|_([A-Za-z])`)
