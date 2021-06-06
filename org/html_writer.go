@@ -264,7 +264,7 @@ func (w *HTMLWriter) WriteHeadline(h Headline) {
 	w.WriteString(fmt.Sprintf(`<div id="outline-container-%s" class="outline-%d">`, h.ID(), h.Lvl+1) + "\n")
 	w.WriteString(fmt.Sprintf(`<h%d id="%s">`, h.Lvl+1, h.ID()) + "\n")
 	if w.document.GetOption("todo") != "nil" && h.Status != "" {
-		w.WriteString(fmt.Sprintf(`<span class="todo">%s</span>`, h.Status) + "\n")
+		w.WriteString(fmt.Sprintf(`<span class="org-todo %s">%s</span>`, strings.ToLower(h.Status), h.Status) + "\n")
 	}
 	if w.document.GetOption("pri") != "nil" && h.Priority != "" {
 		w.WriteString(fmt.Sprintf(`<span class="priority">[%s]</span>`, h.Priority) + "\n")
