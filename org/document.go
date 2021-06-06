@@ -84,7 +84,7 @@ func New() *Configuration {
 		AutoLink:            true,
 		MaxEmphasisNewLines: 1,
 		DefaultSettings: map[string]string{
-			"TODO":         "TODO | DONE",
+			"TODO":         "TODO NEXT WAIT | DONE CLOSE",
 			"EXCLUDE_TAGS": "noexport",
 			"OPTIONS":      "toc:t <:t e:t f:t pri:t todo:t tags:t title:t",
 		},
