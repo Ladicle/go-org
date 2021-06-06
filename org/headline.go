@@ -49,6 +49,9 @@ func (d *Document) parseHeadline(i int, parentStop stopFn) (int, Node) {
 	text := t.content
 	todoKeywords := strings.FieldsFunc(d.Get("TODO"), func(r rune) bool { return unicode.IsSpace(r) || r == '|' })
 	for _, k := range todoKeywords {
+		if idx := strings.LastIndex(k, "("); idx != -1 {
+			k = k[:idx]
+		}
 		if strings.HasPrefix(text, k) && len(text) > len(k) && unicode.IsSpace(rune(text[len(k)])) {
 			headline.Status = k
 			text = text[len(k)+1:]
