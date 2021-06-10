@@ -2,6 +2,7 @@ package org
 
 import (
 	"bytes"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -170,6 +171,14 @@ func (d *Document) loadSetupFile(k Keyword) (int, Node) {
 	path := k.Value
 	if !filepath.IsAbs(path) {
 		path = filepath.Join(filepath.Dir(d.Path), path)
+	}
+	if filepath.HasPrefix(path, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			d.Log.Printf("Bad setup file: %#v: %s", k, err)
+			return 1, k
+		}
+		path = filepath.Join(home, path[2:])
 	}
 	bs, err := d.ReadFile(path)
 	if err != nil {
