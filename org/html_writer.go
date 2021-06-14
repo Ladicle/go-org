@@ -114,6 +114,7 @@ func (w *HTMLWriter) After(d *Document) {
 
 func (w *HTMLWriter) WriteComment(Comment)               {}
 func (w *HTMLWriter) WritePropertyDrawer(PropertyDrawer) {}
+func (w *HTMLWriter) WriteAgenda(Agenda)                 {}
 
 func (w *HTMLWriter) WriteBlock(b Block) {
 	content, params := w.blockContent(b.Name, b.Children), b.ParameterMap()
