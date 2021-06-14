@@ -334,14 +334,7 @@ func (w *OrgWriter) WriteExplicitLineBreak(l ExplicitLineBreak) {
 
 func (w *OrgWriter) WriteTimestamp(t Timestamp) {
 	w.WriteString("<")
-	if t.IsDate {
-		w.WriteString(t.Time.Format(datestampFormat))
-	} else {
-		w.WriteString(t.Time.Format(timestampFormat))
-	}
-	if t.Interval != "" {
-		w.WriteString(" " + t.Interval)
-	}
+	w.WriteString(timeOrDateStr(t))
 	w.WriteString(">")
 }
 
@@ -366,4 +359,30 @@ func (w *OrgWriter) WriteRegularLink(l RegularLink) {
 
 func (w *OrgWriter) WriteMacro(m Macro) {
 	w.WriteString(fmt.Sprintf("{{{%s(%s)}}}", m.Name, strings.Join(m.Parameters, ",")))
+}
+
+func (w *OrgWriter) WriteAgenda(a Agenda) {
+	var logs []string
+	for name, t := range a.Logs {
+		switch name {
+		case "CLOSED":
+			logs = append(logs, fmt.Sprintf("%s: [%s]", name, timeOrDateStr(t)))
+		case "SCHEDULED", "DEADLINE":
+			logs = append(logs, fmt.Sprintf("%s: <%s>", name, timeOrDateStr(t)))
+		}
+	}
+	w.WriteString(strings.Join(logs, " "))
+}
+
+func timeOrDateStr(t Timestamp) string {
+	var str string
+	if t.IsDate {
+		str = t.Time.Format(datestampFormat)
+	} else {
+		str = t.Time.Format(timestampFormat)
+	}
+	if t.Interval != "" {
+		str = fmt.Sprintf("%s %s", str, t.Interval)
+	}
+	return str
 }

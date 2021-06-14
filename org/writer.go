@@ -40,6 +40,7 @@ type Writer interface {
 	WriteTimestamp(Timestamp)
 	WriteFootnoteLink(FootnoteLink)
 	WriteFootnoteDefinition(FootnoteDefinition)
+	WriteAgenda(Agenda)
 }
 
 func WriteNodes(w Writer, nodes ...Node) {
@@ -104,6 +105,8 @@ func WriteNodes(w Writer, nodes ...Node) {
 			w.WriteFootnoteLink(n)
 		case FootnoteDefinition:
 			w.WriteFootnoteDefinition(n)
+		case Agenda:
+			w.WriteAgenda(n)
 		default:
 			if n != nil {
 				panic(fmt.Sprintf("bad node %T %#v", n, n))
