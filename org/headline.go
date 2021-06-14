@@ -25,6 +25,7 @@ type Headline struct {
 	Status     string
 	Priority   string
 	Properties *PropertyDrawer
+	Agenda     *Agenda
 	Title      []Node
 	Tags       []string
 	Children   []Node
@@ -75,6 +76,12 @@ func (d *Document) parseHeadline(i int, parentStop stopFn) (int, Node) {
 		return parentStop(d, i) || d.tokens[i].kind == "headline" && len(d.tokens[i].matches[1]) <= headline.Lvl
 	}
 	consumed, nodes := d.parseMany(i+1, stop)
+	if len(nodes) > 0 {
+		if a, ok := nodes[0].(Agenda); ok {
+			headline.Agenda = &a
+			nodes = nodes[1:]
+		}
+	}
 	if len(nodes) > 0 {
 		if d, ok := nodes[0].(PropertyDrawer); ok {
 			headline.Properties = &d
