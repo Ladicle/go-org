@@ -132,8 +132,12 @@ func (w *HTMLWriter) WriteBlock(b Block) {
 		case params[":details"] == "t":
 			wrapperStart, wrapperEnd = "<details>\n", "</details>\n"
 		}
-		w.WriteString(fmt.Sprintf("%s<div class=\"src src-%s\">\n%s\n</div>\n%s",
-			wrapperStart, lang, content, wrapperEnd))
+		w.WriteString(fmt.Sprintf("%s<div class=\"src src-%s\">\n%s\n</div>\n",
+			wrapperStart, lang, content))
+		if b.Result != nil && params[":exports"] != "code" && params[":exports"] != "none" {
+			WriteNodes(w, b.Result)
+		}
+		w.WriteString(wrapperEnd)
 	case "EXAMPLE":
 		w.WriteString(`<pre class="example">` + "\n" + html.EscapeString(content) + "\n</pre>\n")
 	case "EXPORT":
@@ -149,13 +153,13 @@ func (w *HTMLWriter) WriteBlock(b Block) {
 		w.WriteString(fmt.Sprintf(`<div class="%s-block">`, strings.ToLower(b.Name)) + "\n")
 		w.WriteString(content + "</div>\n")
 	}
-
-	if b.Result != nil && params[":exports"] != "code" && params[":exports"] != "none" {
-		WriteNodes(w, b.Result)
-	}
 }
 
-func (w *HTMLWriter) WriteResult(r Result) { WriteNodes(w, r.Node) }
+func (w *HTMLWriter) WriteResult(r Result) {
+	w.WriteString(`<div class="result">`)
+	WriteNodes(w, r.Node)
+	w.WriteString(`</div>`)
+}
 
 func (w *HTMLWriter) WriteInlineBlock(b InlineBlock) {
 	content := w.blockContent(strings.ToUpper(b.Name), b.Children)
