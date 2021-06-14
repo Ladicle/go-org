@@ -69,6 +69,7 @@ var lexFns = []lexFn{
 	lexList,
 	lexTable,
 	lexHorizontalRule,
+	lexAgenda,
 	lexKeywordOrComment,
 	lexFootnoteDefinition,
 	lexExample,
@@ -226,6 +227,8 @@ func (d *Document) parseOne(i int, stop stopFn) (consumed int, node Node) {
 		consumed, node = d.parseHeadline(i, stop)
 	case "footnoteDefinition":
 		consumed, node = d.parseFootnoteDefinition(i, stop)
+	case "agenda":
+		consumed, node = d.parseAgenda(i, stop)
 	}
 
 	if consumed != 0 {

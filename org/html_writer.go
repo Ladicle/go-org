@@ -132,8 +132,12 @@ func (w *HTMLWriter) WriteBlock(b Block) {
 		case params[":details"] == "t":
 			wrapperStart, wrapperEnd = "<details>\n", "</details>\n"
 		}
-		w.WriteString(fmt.Sprintf("%s<div class=\"src src-%s\">\n%s\n</div>\n%s",
-			wrapperStart, lang, content, wrapperEnd))
+		w.WriteString(fmt.Sprintf("%s<div class=\"src src-%s\">\n%s\n</div>\n",
+			wrapperStart, lang, content))
+		if b.Result != nil && params[":exports"] != "code" && params[":exports"] != "none" {
+			WriteNodes(w, b.Result)
+		}
+		w.WriteString(wrapperEnd)
 	case "EXAMPLE":
 		w.WriteString(`<pre class="example">` + "\n" + html.EscapeString(content) + "\n</pre>\n")
 	case "EXPORT":
@@ -149,13 +153,13 @@ func (w *HTMLWriter) WriteBlock(b Block) {
 		w.WriteString(fmt.Sprintf(`<div class="%s-block">`, strings.ToLower(b.Name)) + "\n")
 		w.WriteString(content + "</div>\n")
 	}
-
-	if b.Result != nil && params[":exports"] != "code" && params[":exports"] != "none" {
-		WriteNodes(w, b.Result)
-	}
 }
 
-func (w *HTMLWriter) WriteResult(r Result) { WriteNodes(w, r.Node) }
+func (w *HTMLWriter) WriteResult(r Result) {
+	w.WriteString(`<div class="result">`)
+	WriteNodes(w, r.Node)
+	w.WriteString(`</div>`)
+}
 
 func (w *HTMLWriter) WriteInlineBlock(b InlineBlock) {
 	content := w.blockContent(strings.ToUpper(b.Name), b.Children)
@@ -263,6 +267,9 @@ func (w *HTMLWriter) WriteHeadline(h Headline) {
 			}
 		}
 	}
+	if len(h.Title) > 0 && h.Title[0].String() == "Footnotes" {
+		return
+	}
 
 	w.WriteString(fmt.Sprintf(`<div id="outline-container-%s" class="outline-%d">`, h.ID(), h.Lvl+1) + "\n")
 	w.WriteString(fmt.Sprintf(`<h%d id="%s">`, h.Lvl+1, h.ID()) + "\n")
@@ -365,7 +372,9 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 			url = strings.TrimSuffix(url, ".org") + "/"
 		}
 	} else if isRelative && strings.HasSuffix(url, ".org") {
-		url = strings.TrimSuffix(url, ".org") + ".html"
+		if idx := strings.LastIndex(url, "/"); idx != -1 {
+			url = url[:idx]
+		}
 	}
 	if prefix := w.document.Links[l.Protocol]; prefix != "" {
 		url = html.EscapeString(prefix) + strings.TrimPrefix(url, l.Protocol+":")
