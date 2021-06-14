@@ -263,6 +263,9 @@ func (w *HTMLWriter) WriteHeadline(h Headline) {
 			}
 		}
 	}
+	if len(h.Title) > 0 && h.Title[0].String() == "Footnotes" {
+		return
+	}
 
 	w.WriteString(fmt.Sprintf(`<div id="outline-container-%s" class="outline-%d">`, h.ID(), h.Lvl+1) + "\n")
 	w.WriteString(fmt.Sprintf(`<h%d id="%s">`, h.Lvl+1, h.ID()) + "\n")
