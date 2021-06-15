@@ -265,11 +265,12 @@ func (w *HTMLWriter) WriteHeadline(h Headline) {
 	if h.IsExcluded(w.document) {
 		return
 	}
-	if len(h.Title) > 0 && h.Title[0].String() == "Footnotes" {
-		return
-	}
 
-	w.WriteString(fmt.Sprintf(`<div id="outline-container-%s" class="outline-%d">`, h.ID(), h.Lvl+1) + "\n")
+	var ftnCls string
+	if len(h.Title) > 0 && h.Title[0].String() == "Footnotes" {
+		ftnCls = " footnotes-outline"
+	}
+	w.WriteString(fmt.Sprintf(`<div id="outline-container-%s" class="outline-%d%s">`, h.ID(), h.Lvl+1, ftnCls) + "\n")
 	w.WriteString(fmt.Sprintf(`<h%d id="%s">`, h.Lvl+1, h.ID()) + "\n")
 	if w.document.GetOption("todo") != "nil" && h.Status != "" {
 		w.WriteString(fmt.Sprintf(`<span class="org-todo %s">%s</span>`, strings.ToLower(h.Status), h.Status) + "\n")
