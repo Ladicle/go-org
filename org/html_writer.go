@@ -270,35 +270,25 @@ func (w *HTMLWriter) WriteHeadline(h Headline) {
 		}
 	}
 
-	var footnotes bool
-	for _, t := range h.Title {
-		if txt, ok := t.(Text); ok && strings.ToLower(txt.Content) == "footnotes" {
-			footnotes = true
-			break
-		}
-	}
-
 	w.WriteString(fmt.Sprintf(`<div id="outline-container-%s" class="outline-%d">`, h.ID(), h.Lvl+1) + "\n")
-	if !footnotes {
-		w.WriteString(fmt.Sprintf(`<h%d id="%s">`, h.Lvl+1, h.ID()) + "\n")
-		if w.document.GetOption("todo") != "nil" && h.Status != "" {
-			w.WriteString(fmt.Sprintf(`<span class="org-todo %s">%s</span>`, strings.ToLower(h.Status), h.Status) + "\n")
-		}
-		if w.document.GetOption("pri") != "nil" && h.Priority != "" {
-			w.WriteString(fmt.Sprintf(`<span class="priority">[%s]</span>`, h.Priority) + "\n")
-		}
-
-		WriteNodes(w, h.Title...)
-		if w.document.GetOption("tags") != "nil" && len(h.Tags) != 0 {
-			tags := make([]string, len(h.Tags))
-			for i, tag := range h.Tags {
-				tags[i] = fmt.Sprintf(`<span>%s</span>`, tag)
-			}
-			w.WriteString("&#xa0;&#xa0;&#xa0;")
-			w.WriteString(fmt.Sprintf(`<span class="tags">%s</span>`, strings.Join(tags, "&#xa0;")))
-		}
-		w.WriteString(fmt.Sprintf("\n</h%d>\n", h.Lvl+1))
+	w.WriteString(fmt.Sprintf(`<h%d id="%s">`, h.Lvl+1, h.ID()) + "\n")
+	if w.document.GetOption("todo") != "nil" && h.Status != "" {
+		w.WriteString(fmt.Sprintf(`<span class="org-todo %s">%s</span>`, strings.ToLower(h.Status), h.Status) + "\n")
 	}
+	if w.document.GetOption("pri") != "nil" && h.Priority != "" {
+		w.WriteString(fmt.Sprintf(`<span class="priority">[%s]</span>`, h.Priority) + "\n")
+	}
+
+	WriteNodes(w, h.Title...)
+	if w.document.GetOption("tags") != "nil" && len(h.Tags) != 0 {
+		tags := make([]string, len(h.Tags))
+		for i, tag := range h.Tags {
+			tags[i] = fmt.Sprintf(`<span>%s</span>`, tag)
+		}
+		w.WriteString("&#xa0;&#xa0;&#xa0;")
+		w.WriteString(fmt.Sprintf(`<span class="tags">%s</span>`, strings.Join(tags, "&#xa0;")))
+	}
+	w.WriteString(fmt.Sprintf("\n</h%d>\n", h.Lvl+1))
 	if content := w.WriteNodesAsString(h.Children...); content != "" {
 		w.WriteString(fmt.Sprintf(`<div id="outline-text-%s" class="outline-text-%d">`, h.ID(), h.Lvl+1) + "\n" + content + "</div>\n")
 	}

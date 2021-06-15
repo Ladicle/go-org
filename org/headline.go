@@ -43,6 +43,10 @@ func lexHeadline(line string) (token, bool) {
 
 func (d *Document) parseHeadline(i int, parentStop stopFn) (int, Node) {
 	t, headline := d.tokens[i], Headline{}
+	if t.content == "Footnotes" {
+		return 1, nil
+	}
+
 	headline.Lvl = len(t.matches[1])
 
 	headline.Index = d.addHeadline(&headline)
