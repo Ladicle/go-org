@@ -374,9 +374,7 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 			url = strings.TrimSuffix(url, ".org") + "/"
 		}
 	} else if isRelative && strings.HasSuffix(url, ".org") {
-		if idx := strings.LastIndex(url, "/"); idx != -1 {
-			url = url[:idx]
-		}
+		url = "./" + strings.TrimSuffix(url, ".org")
 	}
 	if prefix := w.document.Links[l.Protocol]; prefix != "" {
 		url = html.EscapeString(prefix) + strings.TrimPrefix(url, l.Protocol+":")
