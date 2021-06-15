@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html"
 	"log"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -359,7 +360,10 @@ func (w *HTMLWriter) WriteTimestamp(t Timestamp) {
 }
 
 func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
-	url := html.EscapeString(l.URL)
+	var (
+		desc string
+		url  = html.EscapeString(l.URL)
+	)
 	if l.Protocol == "file" {
 		url = url[len("file:"):]
 	}
@@ -368,10 +372,13 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 			url = "../" + url
 		}
 		if strings.HasSuffix(url, ".org") {
-			url = strings.TrimSuffix(url, ".org") + "/"
+			desc = strings.TrimSuffix(url, ".org")
+			url = desc + "/"
+			desc = filepath.Base(desc)
 		}
 	} else if isRelative && strings.HasSuffix(url, ".org") {
-		url = "./" + strings.TrimSuffix(url, ".org")
+		desc = strings.TrimSuffix(url, ".org")
+		url = "../" + desc
 	}
 	if prefix := w.document.Links[l.Protocol]; prefix != "" {
 		url = html.EscapeString(prefix) + strings.TrimPrefix(url, l.Protocol+":")
@@ -392,11 +399,13 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 			w.WriteString(fmt.Sprintf(`<a href="%s"><video src="%s" title="%s"></video></a>`, url, description, description))
 		}
 	default:
-		description := url
-		if l.Description != nil {
-			description = w.WriteNodesAsString(l.Description...)
+		switch {
+		case l.Description != nil:
+			desc = w.WriteNodesAsString(l.Description...)
+		case desc == "":
+			desc = url
 		}
-		w.WriteString(fmt.Sprintf(`<a href="%s">%s</a>`, url, description))
+		w.WriteString(fmt.Sprintf(`<a href="%s">%s</a>`, url, desc))
 	}
 }
 
