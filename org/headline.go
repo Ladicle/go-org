@@ -9,8 +9,9 @@ import (
 
 type Outline struct {
 	*Section
-	last  *Section
-	count int
+	last     *Section
+	count    int
+	secCount int
 }
 
 type Section struct {
@@ -22,6 +23,7 @@ type Section struct {
 type Headline struct {
 	Index      int
 	Lvl        int
+	Number     string
 	Status     string
 	Priority   string
 	Properties *PropertyDrawer
@@ -49,7 +51,7 @@ func (d *Document) parseHeadline(i int, parentStop stopFn) (int, Node) {
 
 	headline.Lvl = len(t.matches[1])
 
-	headline.Index = d.addHeadline(&headline)
+	headline.Index, headline.Number = d.addHeadline(&headline)
 
 	text := t.content
 	todoKeywords := strings.FieldsFunc(d.Get("TODO"), func(r rune) bool { return unicode.IsSpace(r) || r == '|' })
