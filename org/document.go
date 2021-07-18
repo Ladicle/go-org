@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -121,7 +122,7 @@ func (c *Configuration) Parse(input io.Reader, path string) (d *Document) {
 	outlineSection := &Section{}
 	d = &Document{
 		Configuration:  c,
-		Outline:        Outline{outlineSection, outlineSection, 0},
+		Outline:        Outline{outlineSection, outlineSection, 0, 1},
 		BufferSettings: map[string]string{},
 		NamedNodes:     map[string]Node{},
 		Links:          map[string]string{},
@@ -180,6 +181,7 @@ func (d *Document) Get(key string) string {
 // - todo (export headline todo status)
 // - pri (export headline priority)
 // - tags (export headline tags)
+// - sec (export section header stile: num)
 // see https://orgmode.org/manual/Export-settings.html for more information
 func (d *Document) GetOption(key string) string {
 	get := func(settings map[string]string) string {
@@ -250,12 +252,25 @@ func (d *Document) parseMany(i int, stop stopFn) (int, []Node) {
 	return i - start, nodes
 }
 
-func (d *Document) addHeadline(headline *Headline) int {
+func (d *Document) addHeadline(headline *Headline) (int, string) {
 	current := &Section{Headline: headline}
 	d.Outline.last.add(current)
 	d.Outline.count++
+
+	if d.Outline.last.Headline != nil && d.Outline.last.Headline.Lvl == current.Headline.Lvl {
+		d.Outline.secCount++
+	} else {
+		d.Outline.secCount = 1
+	}
+	var sectionNum string
+	if current.Parent.Headline == nil {
+		sectionNum = strconv.Itoa(d.Outline.secCount)
+	} else {
+		sectionNum = fmt.Sprintf("%v.%v", current.Parent.Headline.Number, d.Outline.secCount)
+	}
+
 	d.Outline.last = current
-	return d.Outline.count
+	return d.Outline.count, sectionNum
 }
 
 func tokenize(line string) token {

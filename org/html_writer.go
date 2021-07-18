@@ -244,6 +244,9 @@ func (w *HTMLWriter) writeSection(section *Section, maxLvl int) {
 	}
 	// NOTE: To satisfy hugo ExtractTOC() check we cannot use `<li>\n` here. Doesn't really matter, just a note.
 	w.WriteString("<li>")
+	if w.document.GetOption("sec") == "num" {
+		w.WriteString(fmt.Sprintf("<span class='section-number'>%s</span>", section.Headline.Number))
+	}
 	h := section.Headline
 	title := cleanHeadlineTitleForHTMLAnchorRegexp.ReplaceAllString(w.WriteNodesAsString(h.Title...), "")
 	w.WriteString(fmt.Sprintf("<a href=\"#%s\">%s</a>\n", h.ID(), title))
@@ -272,6 +275,9 @@ func (w *HTMLWriter) WriteHeadline(h Headline) {
 
 	w.WriteString(fmt.Sprintf(`<div id="outline-container-%s" class="outline-%d">`, h.ID(), h.Lvl+1) + "\n")
 	w.WriteString(fmt.Sprintf(`<h%d id="%s">`, h.Lvl+1, h.ID()) + "\n")
+	if w.document.GetOption("sec") == "num" {
+		w.WriteString(fmt.Sprintf("<span class='section-number'>%s</span>", h.Number))
+	}
 	if w.document.GetOption("todo") != "nil" && h.Status != "" {
 		w.WriteString(fmt.Sprintf(`<span class="org-todo %s">%s</span>`, strings.ToLower(h.Status), h.Status) + "\n")
 	}
