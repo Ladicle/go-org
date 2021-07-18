@@ -524,6 +524,8 @@ func (w *HTMLWriter) WriteNodeWithMeta(n NodeWithMeta) {
 		}
 		if strings.HasPrefix(out, "<details>") {
 			out = fmt.Sprintf("<details>\n<summary>%s</summary>\n%s\n", caption, strings.TrimPrefix(out, "<details>"))
+		} else if _, ok := n.Node.(Table); ok {
+			out = fmt.Sprintf("<figure>\n<figcaption>\n%s\n</figcaption>\n%s</figure>\n", caption, out)
 		} else {
 			out = fmt.Sprintf("<figure>\n%s<figcaption>\n%s\n</figcaption>\n</figure>\n", out, caption)
 		}
