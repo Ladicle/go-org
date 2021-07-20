@@ -27,6 +27,21 @@ func (l InnerLink) Description() string {
 	return fmt.Sprintf("%v %d", l.Type, l.Index)
 }
 
+func (l InnerLink) DescriptionWithLang(lang string) string {
+	t := l.Type
+	if lang == "jp" {
+		switch l.Type {
+		case TableLink:
+			t = "表"
+		case FigureLink:
+			t = "図"
+		case CodeLink:
+			t = "リスト"
+		}
+	}
+	return fmt.Sprintf("%v %d", t, l.Index)
+}
+
 func (l InnerLink) Link() string {
 	return fmt.Sprintf("#%s--%s", strings.ToLower(string(l.Type)), l.Name)
 }
