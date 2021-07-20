@@ -100,13 +100,22 @@ func ReadConfig(configFile string) (*Config, error) {
 		Template:   template.New("_").Funcs(TemplateFuncs),
 		OrgConfig:  orgConfig,
 	}
-	for name, node := range document.NamedNodes {
-		if block, ok := node.(org.Block); ok {
-			if block.Parameters[0] != "html" {
-				continue
-			}
-			if _, err := config.Template.New(name).Parse(org.String(block.Children)); err != nil {
-				return nil, err
+	cur := 0
+	queue := document.Nodes
+	for cur < len(queue) {
+		node := queue[cur]
+		cur++
+		switch n := node.(type) {
+		case org.Headline:
+			queue = append(queue, n.Children...)
+		case org.NodeWithMeta:
+			if block, ok := n.Node.(org.Block); ok {
+				if block.Parameters[0] != "html" {
+					continue
+				}
+				if _, err := config.Template.New(n.Meta.Name).Parse(org.String(block.Children)); err != nil {
+					return nil, err
+				}
 			}
 		}
 	}

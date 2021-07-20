@@ -15,7 +15,6 @@ type Writer interface {
 	WriteInclude(Include)
 	WriteComment(Comment)
 	WriteNodeWithMeta(NodeWithMeta)
-	WriteNodeWithName(NodeWithName)
 	WriteHeadline(Headline)
 	WriteBlock(Block)
 	WriteResult(Result)
@@ -55,8 +54,6 @@ func WriteNodes(w Writer, nodes ...Node) {
 			w.WriteComment(n)
 		case NodeWithMeta:
 			w.WriteNodeWithMeta(n)
-		case NodeWithName:
-			w.WriteNodeWithName(n)
 		case Headline:
 			w.WriteHeadline(n)
 		case Block:

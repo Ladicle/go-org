@@ -39,11 +39,14 @@ type Document struct {
 	baseLvl        int
 	Macros         map[string]string
 	Links          map[string]string
+	InnerLinks     map[string]InnerLink
 	Nodes          []Node
-	NamedNodes     map[string]Node
 	Outline        Outline           // Outline is a Table Of Contents for the document and contains all sections (headline + content).
 	BufferSettings map[string]string // Settings contains all settings that were parsed from keywords.
 	Error          error
+	figureCounter  int
+	codeCounter    int
+	tableCounter   int
 }
 
 // Node represents a parsed node of the document.
@@ -124,8 +127,8 @@ func (c *Configuration) Parse(input io.Reader, path string) (d *Document) {
 		Configuration:  c,
 		Outline:        Outline{outlineSection, outlineSection, 0, 1},
 		BufferSettings: map[string]string{},
-		NamedNodes:     map[string]Node{},
 		Links:          map[string]string{},
+		InnerLinks:     map[string]InnerLink{},
 		Macros:         map[string]string{},
 		Path:           path,
 	}
