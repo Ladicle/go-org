@@ -411,7 +411,7 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 			l, ok := w.document.InnerLinks[url]
 			if ok {
 				url = l.Link()
-				desc = l.Description()
+				desc = l.DescriptionWithLang(w.document.Get("LANGUAGE"))
 			} else {
 				desc = url
 			}
@@ -519,7 +519,8 @@ func (w *HTMLWriter) WriteNodeWithMeta(n NodeWithMeta) {
 		var number string
 		if n.Meta.Name != "" {
 			l := w.document.InnerLinks[n.Meta.Name]
-			number = fmt.Sprintf(`<span class="caption-number"><a href="%s">%s</a>:</span>`, l.Link(), l.Description())
+			number = fmt.Sprintf(`<span class="caption-number"><a href="%s">%s</a>:</span>`,
+				l.Link(), l.DescriptionWithLang(w.document.Get("LANGUAGE")))
 		}
 		if strings.HasPrefix(out, "<details>") {
 			out = fmt.Sprintf("<details>\n<summary>%s</summary>\n%s\n", caption, strings.TrimPrefix(out, "<details>"))
