@@ -2,11 +2,34 @@ package org
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 )
+
+type LinkType string
+
+const (
+	TableLink  = LinkType("Table")
+	FigureLink = LinkType("Figure")
+	CodeLink   = LinkType("Code")
+)
+
+type InnerLink struct {
+	Index int
+	Name  string
+	Type  LinkType
+}
+
+func (l InnerLink) Description() string {
+	return fmt.Sprintf("%v %d", l.Type, l.Index)
+}
+
+func (l InnerLink) Link() string {
+	return fmt.Sprintf("#%s--%s", strings.ToLower(string(l.Type)), l.Name)
+}
 
 type Comment struct{ Content string }
 
@@ -15,17 +38,13 @@ type Keyword struct {
 	Value string
 }
 
-type NodeWithName struct {
-	Name string
-	Node Node
-}
-
 type NodeWithMeta struct {
 	Node Node
 	Meta Metadata
 }
 
 type Metadata struct {
+	Name           string
 	Caption        [][]Node
 	HTMLAttributes [][]string
 }
@@ -57,8 +76,6 @@ func (d *Document) parseComment(i int, stop stopFn) (int, Node) {
 func (d *Document) parseKeyword(i int, stop stopFn) (int, Node) {
 	k := parseKeyword(d.tokens[i])
 	switch k.Key {
-	case "NAME":
-		return d.parseNodeWithName(k, i, stop)
 	case "SETUPFILE":
 		return d.loadSetupFile(k)
 	case "INCLUDE":
@@ -73,7 +90,7 @@ func (d *Document) parseKeyword(i int, stop stopFn) (int, Node) {
 			d.Macros[parts[0]] = parts[1]
 		}
 		return 1, k
-	case "CAPTION", "ATTR_HTML":
+	case "NAME", "CAPTION", "ATTR_HTML":
 		consumed, node := d.parseAffiliated(i, stop)
 		if consumed != 0 {
 			return consumed, node
@@ -89,22 +106,12 @@ func (d *Document) parseKeyword(i int, stop stopFn) (int, Node) {
 	}
 }
 
-func (d *Document) parseNodeWithName(k Keyword, i int, stop stopFn) (int, Node) {
-	if stop(d, i+1) {
-		return 0, nil
-	}
-	consumed, node := d.parseOne(i+1, stop)
-	if consumed == 0 || node == nil {
-		return 0, nil
-	}
-	d.NamedNodes[k.Value] = node
-	return consumed + 1, NodeWithName{k.Value, node}
-}
-
 func (d *Document) parseAffiliated(i int, stop stopFn) (int, Node) {
 	start, meta := i, Metadata{}
 	for ; !stop(d, i) && d.tokens[i].kind == "keyword"; i++ {
 		switch k := parseKeyword(d.tokens[i]); k.Key {
+		case "NAME":
+			meta.Name = k.Value
 		case "CAPTION":
 			meta.Caption = append(meta.Caption, d.parseInline(k.Value))
 		case "ATTR_HTML":
@@ -137,6 +144,45 @@ func (d *Document) parseAffiliated(i int, stop stopFn) (int, Node) {
 		return 0, nil
 	}
 	i += consumed
+
+	switch n := node.(type) {
+	case Table:
+		d.tableCounter++
+		if meta.Name == "" {
+			meta.Name = fmt.Sprintf("t%d", d.tableCounter)
+		}
+		d.InnerLinks[meta.Name] = InnerLink{
+			Index: d.tableCounter,
+			Name:  meta.Name,
+			Type:  TableLink,
+		}
+	case Block:
+		if n.Name != "SRC" {
+			break
+		}
+		d.codeCounter++
+		if meta.Name == "" {
+			meta.Name = fmt.Sprintf("c%d", d.codeCounter)
+		}
+		d.InnerLinks[meta.Name] = InnerLink{
+			Index: d.codeCounter,
+			Name:  meta.Name,
+			Type:  CodeLink,
+		}
+	case RegularLink:
+		if !isImageOrVideoLink(n) {
+			break
+		}
+		d.figureCounter++
+		if meta.Name == "" {
+			meta.Name = fmt.Sprintf("f%d", d.figureCounter)
+		}
+		d.InnerLinks[meta.Name] = InnerLink{
+			Index: d.figureCounter,
+			Name:  meta.Name,
+			Type:  FigureLink,
+		}
+	}
 	return i - start, NodeWithMeta{node, meta}
 }
 
@@ -199,5 +245,4 @@ func (d *Document) loadSetupFile(k Keyword) (int, Node) {
 func (n Comment) String() string      { return orgWriter.WriteNodesAsString(n) }
 func (n Keyword) String() string      { return orgWriter.WriteNodesAsString(n) }
 func (n NodeWithMeta) String() string { return orgWriter.WriteNodesAsString(n) }
-func (n NodeWithName) String() string { return orgWriter.WriteNodesAsString(n) }
 func (n Include) String() string      { return orgWriter.WriteNodesAsString(n) }

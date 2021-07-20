@@ -405,7 +405,13 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 		case l.Description != nil:
 			desc = w.WriteNodesAsString(l.Description...)
 		case desc == "":
-			desc = url
+			l, ok := w.document.InnerLinks[url]
+			if ok {
+				url = l.Link()
+				desc = l.Description()
+			} else {
+				desc = url
+			}
 		}
 		w.WriteString(fmt.Sprintf(`<a href="%s">%s</a>`, url, desc))
 	}
@@ -522,19 +528,20 @@ func (w *HTMLWriter) WriteNodeWithMeta(n NodeWithMeta) {
 			}
 			caption += w.WriteNodesAsString(ns...)
 		}
+		var number string
+		if n.Meta.Name != "" {
+			l := w.document.InnerLinks[n.Meta.Name]
+			number = fmt.Sprintf(`<span class="caption-number"><a href="%s">%s</a>:</span>`, l.Link(), l.Description())
+		}
 		if strings.HasPrefix(out, "<details>") {
 			out = fmt.Sprintf("<details>\n<summary>%s</summary>\n%s\n", caption, strings.TrimPrefix(out, "<details>"))
 		} else if _, ok := n.Node.(Table); ok {
-			out = fmt.Sprintf("<figure>\n<figcaption>\n%s\n</figcaption>\n%s</figure>\n", caption, out)
+			out = fmt.Sprintf("<figure>\n<figcaption>\n%s%s\n</figcaption>\n%s</figure>\n", number, caption, out)
 		} else {
-			out = fmt.Sprintf("<figure>\n%s<figcaption>\n%s\n</figcaption>\n</figure>\n", out, caption)
+			out = fmt.Sprintf("<figure>\n%s<figcaption>\n%s%s\n</figcaption>\n</figure>\n", out, number, caption)
 		}
 	}
 	w.WriteString(out)
-}
-
-func (w *HTMLWriter) WriteNodeWithName(n NodeWithName) {
-	WriteNodes(w, n.Node)
 }
 
 func (w *HTMLWriter) WriteTable(t Table) {
