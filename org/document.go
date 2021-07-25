@@ -91,7 +91,7 @@ func New() *Configuration {
 		DefaultSettings: map[string]string{
 			"TODO":         "TODO NEXT WAIT | DONE CLOSE",
 			"EXCLUDE_TAGS": "noexport",
-			"OPTIONS":      "toc:t <:t e:t f:t pri:t todo:t tags:t title:t",
+			"OPTIONS":      "toc:t <:t e:t f:t pri:t todo:t tags:t title:t sec:num",
 		},
 		Log:      log.New(os.Stderr, "go-org: ", 0),
 		ReadFile: ioutil.ReadFile,
