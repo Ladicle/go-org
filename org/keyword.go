@@ -42,8 +42,8 @@ func (l InnerLink) DescriptionWithLang(lang string) string {
 	return fmt.Sprintf("%v %d", t, l.Index)
 }
 
-func (l InnerLink) Link() string {
-	return fmt.Sprintf("#%s--%s", strings.ToLower(string(l.Type)), l.Name)
+func (l InnerLink) ID() string {
+	return fmt.Sprintf("%s--%s", strings.ToLower(string(l.Type)), l.Name)
 }
 
 type Comment struct{ Content string }
