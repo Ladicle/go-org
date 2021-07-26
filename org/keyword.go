@@ -230,22 +230,24 @@ func (d *Document) parseInclude(k Keyword) (int, Node) {
 
 func (d *Document) loadSetupFile(k Keyword) (int, Node) {
 	var path string
-	if !filepath.IsAbs(k.Value) {
-		path = filepath.Join(filepath.Dir(d.Path), k.Value)
-	}
-	if filepath.HasPrefix(k.Value, "~/") {
+	switch {
+	case filepath.HasPrefix(k.Value, "~/"):
 		home, err := os.UserHomeDir()
 		if err != nil {
 			d.Log.Printf("Failed to get home directory for setup file: %#v: %s", k, err)
 			return 1, k
 		}
 		path = filepath.Join(home, k.Value[2:])
+	case !filepath.IsAbs(k.Value):
+		path = filepath.Join(filepath.Dir(d.Path), k.Value)
 	}
+
 	bs, err := d.ReadFile(path)
 	if err != nil {
 		d.Log.Printf("Failed to read setup file: %#v: %s", k, err)
 		return 1, k
 	}
+
 	setupDocument := d.Configuration.Parse(bytes.NewReader(bs), path)
 	if err := setupDocument.Error; err != nil {
 		d.Log.Printf("Failed to parse setup file: %#v: %s", k, err)
