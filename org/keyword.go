@@ -14,7 +14,7 @@ type LinkType string
 const (
 	TableLink  = LinkType("Table")
 	FigureLink = LinkType("Figure")
-	CodeLink   = LinkType("Code")
+	CodeLink   = LinkType("List")
 )
 
 type InnerLink struct {
