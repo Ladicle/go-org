@@ -231,7 +231,7 @@ func (w *HTMLWriter) WriteFootnotes(d *Document) {
 
 func (w *HTMLWriter) WriteOutline(d *Document, maxLvl int) {
 	if len(d.Outline.Children) != 0 {
-		w.WriteString("<nav>\n<ul>\n")
+		w.WriteString(`<nav class="toc">\n<ul>\n`)
 		for _, section := range d.Outline.Children {
 			w.writeSection(section, maxLvl)
 		}
