@@ -89,9 +89,9 @@ func New() *Configuration {
 		AutoLink:            true,
 		MaxEmphasisNewLines: 1,
 		DefaultSettings: map[string]string{
-			"TODO":         "TODO NEXT WAIT | DONE CLOSE",
+			"TODO":         "TODO | DONE",
 			"EXCLUDE_TAGS": "noexport",
-			"OPTIONS":      "toc:t <:t e:t f:t pri:t todo:t tags:t title:t sec:num",
+			"OPTIONS":      "toc:t <:t e:t f:t pri:t todo:t tags:t title:nil sec:nil",
 		},
 		Log:      log.New(os.Stderr, "go-org: ", 0),
 		ReadFile: ioutil.ReadFile,
