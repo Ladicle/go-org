@@ -441,14 +441,21 @@ func (w *HTMLWriter) WriteList(l List) {
 }
 
 func (w *HTMLWriter) WriteListItem(li ListItem) {
-	attributes := ""
+	var attributes string
 	if li.Value != "" {
 		attributes += fmt.Sprintf(` value="%s"`, li.Value)
 	}
-	if li.Status != "" {
-		attributes += fmt.Sprintf(` class="%s"`, listItemStatuses[li.Status])
-	}
+
 	w.WriteString(fmt.Sprintf("<li%s>", attributes))
+
+	if li.Status != "" {
+		var checked string
+		if li.Status == "X" {
+			checked = " checked"
+		}
+		w.WriteString(fmt.Sprintf(`<input type="checkbox"%s>`, checked))
+	}
+
 	w.writeListItemContent(li.Children)
 	w.WriteString("</li>\n")
 }
