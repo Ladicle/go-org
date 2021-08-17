@@ -260,11 +260,19 @@ func (d *Document) addHeadline(headline *Headline) (int, string) {
 	d.Outline.last.add(current)
 	d.Outline.count++
 
-	if d.Outline.last.Headline != nil && d.Outline.last.Headline.Lvl == current.Headline.Lvl {
+	switch {
+	case d.Outline.last.Headline == nil:
+	// noop
+	case d.Outline.last.Headline.Lvl == current.Headline.Lvl:
 		d.Outline.secCount++
-	} else {
+	case d.Outline.last.Headline.Lvl < current.Headline.Lvl:
 		d.Outline.secCount = 1
+	default:
+		dots := strings.Split(d.Outline.last.Parent.Headline.Number, ".")
+		i, _ := strconv.Atoi(dots[len(dots)-1])
+		d.Outline.secCount = i + 1
 	}
+
 	var sectionNum string
 	if current.Parent.Headline == nil {
 		sectionNum = strconv.Itoa(d.Outline.secCount)
