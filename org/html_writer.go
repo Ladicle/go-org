@@ -548,6 +548,8 @@ func (w *HTMLWriter) WriteNodeWithMeta(n NodeWithMeta) {
 		} else {
 			out = fmt.Sprintf("<figure>\n%s<figcaption>\n%s%s\n</figcaption>\n</figure>\n", out, number, caption)
 		}
+	} else {
+		out = fmt.Sprintf("<figure>\n%s\n</figure>\n", out)
 	}
 	w.WriteString(out)
 }
