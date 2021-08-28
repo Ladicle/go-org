@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html"
 	"log"
-	"path/filepath"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -366,16 +365,25 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 		desc string
 		url  = html.EscapeString(l.URL)
 	)
-	// Strip `<protocol>:` prefix
-	if l.Protocol != "" {
-		url = url[len(l.Protocol)+1:]
-
+	if l.Protocol == "file" || l.Protocol == "" {
+		// strip file: protocol
+		if l.Protocol == "file" {
+			url = url[len(l.Protocol)+1:]
+		}
+		// resolve relative link
+		if !strings.HasPrefix(url, "/") {
+			url = "../" + url
+		}
 		// resolve page link
 		links := strings.SplitN(url, "::", 2)
 		if len(links) == 2 {
 			// TODO: set anchor
+			url = links[0]
 		}
-		url = filepath.Join("/", strings.TrimSuffix(links[0], ".org"))
+		// strip .org extension
+		if idx := strings.LastIndex(url, ".org"); idx != -1 {
+			url = url[:idx]
+		}
 	}
 	if prefix := w.document.Links[l.Protocol]; prefix != "" {
 		url = html.EscapeString(prefix) + strings.TrimPrefix(url, l.Protocol+":")

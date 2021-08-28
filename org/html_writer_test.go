@@ -44,15 +44,16 @@ func TestExtendedHTMLWriter(t *testing.T) {
 }
 
 var prettyRelativeLinkTests = map[string]string{
-	"[[/hello.org][hello]]": `<p><a href="/hello/">hello</a></p>`,
-	"[[hello.org][hello]]":  `<p><a href="../hello/">hello</a></p>`,
-	"[[file:/hello.org]]":   `<p><a href="/hello/">/hello/</a></p>`,
-	"[[file:hello.org]]":    `<p><a href="../hello/">../hello/</a></p>`,
-	"[[http://hello.org]]":  `<p><a href="http://hello.org">http://hello.org</a></p>`,
-	"[[/foo.png]]":          `<p><img src="/foo.png" alt="/foo.png" title="/foo.png" /></p>`,
-	"[[foo.png]]":           `<p><img src="../foo.png" alt="../foo.png" title="../foo.png" /></p>`,
-	"[[/foo.png][foo]]":     `<p><a href="/foo.png">foo</a></p>`,
-	"[[foo.png][foo]]":      `<p><a href="../foo.png">foo</a></p>`,
+	"[[/hello.org][hello]]":             `<p><a href="/hello">hello</a></p>`,
+	"[[hello.org][hello]]":              `<p><a href="../hello">hello</a></p>`,
+	"[[file:/hello.org]]":               `<p><a href="/hello">/hello</a></p>`,
+	"[[file:hello.org]]":                `<p><a href="../hello">../hello</a></p>`,
+	"[[http://hello.org]]":              `<p><a href="http://hello.org">http://hello.org</a></p>`,
+	"[[/foo.png]]":                      `<p><img src="/foo.png" alt="/foo.png" title="/foo.png" /></p>`,
+	"[[foo.png]]":                       `<p><img src="../foo.png" alt="../foo.png" title="../foo.png" /></p>`,
+	"[[/foo.png][foo]]":                 `<p><a href="/foo.png">foo</a></p>`,
+	"[[foo.png][foo]]":                  `<p><a href="../foo.png">foo</a></p>`,
+	"[[file:hello.org::*world][world]]": `<p><a href="../hello">world</a></p>`,
 }
 
 func TestPrettyRelativeLinks(t *testing.T) {
