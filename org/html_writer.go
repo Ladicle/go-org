@@ -366,21 +366,16 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 		desc string
 		url  = html.EscapeString(l.URL)
 	)
-	if l.Protocol == "file" {
-		url = url[len("file:"):]
-	}
-	if isRelative := l.Protocol == "file" || l.Protocol == ""; isRelative && w.PrettyRelativeLinks {
-		if !strings.HasPrefix(url, "/") {
-			url = "../" + url
+	// Strip `<protocol>:` prefix
+	if l.Protocol != "" {
+		url = url[len(l.Protocol)+1:]
+
+		// resolve page link
+		links := strings.SplitN(url, "::", 2)
+		if len(links) == 2 {
+			// TODO: set anchor
 		}
-		if strings.HasSuffix(url, ".org") {
-			desc = strings.TrimSuffix(url, ".org")
-			url = desc + "/"
-			desc = filepath.Base(desc)
-		}
-	} else if isRelative && strings.HasSuffix(url, ".org") {
-		desc = strings.TrimSuffix(url, ".org")
-		url = "../" + desc
+		url = filepath.Join("/", strings.TrimSuffix(links[0], ".org"))
 	}
 	if prefix := w.document.Links[l.Protocol]; prefix != "" {
 		url = html.EscapeString(prefix) + strings.TrimPrefix(url, l.Protocol+":")
