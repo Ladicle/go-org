@@ -216,7 +216,7 @@ func (w *HTMLWriter) WriteFootnotes(d *Document) {
 					name = k
 				}
 			}
-			w.log.Printf("Missing footnote definition for [fn:%s] (#%d)", name, id)
+			w.log.Printf("Missing footnote definition for [fn:%s] (#%d): %v", name, id, d.Path)
 			continue
 		}
 		w.WriteString(`<div class="footnote-definition">` + "\n")
