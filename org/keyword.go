@@ -213,9 +213,19 @@ func (d *Document) parseInclude(k Keyword) (int, Node) {
 	}
 	if m := includeFileRegexp.FindStringSubmatch(k.Value); m != nil {
 		path, kind, lang := m[1], m[2], m[3]
-		if !filepath.IsAbs(path) {
-			path = filepath.Join(filepath.Dir(d.Path), path)
+
+		switch {
+		case filepath.HasPrefix(k.Value, "~/"):
+			home, err := os.UserHomeDir()
+			if err != nil {
+				d.Log.Printf("Failed to get home directory for include file: %#v: %s", k, err)
+				return 1, k
+			}
+			path = filepath.Join(home, k.Value[2:])
+		case !filepath.IsAbs(k.Value):
+			path = filepath.Join(filepath.Dir(d.Path), k.Value)
 		}
+
 		resolve = func() Node {
 			bs, err := d.ReadFile(path)
 			if err != nil {
