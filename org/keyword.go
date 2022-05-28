@@ -215,21 +215,21 @@ func (d *Document) parseInclude(k Keyword) (int, Node) {
 		path, kind, lang := m[1], m[2], m[3]
 
 		switch {
-		case filepath.HasPrefix(k.Value, "~/"):
+		case filepath.HasPrefix(path, "~/"):
 			home, err := os.UserHomeDir()
 			if err != nil {
-				d.Log.Printf("Failed to get home directory for include file: %#v: %s", k, err)
+				d.Log.Printf("Failed to get home directory for include file: %#v: %s", path, err)
 				return 1, k
 			}
-			path = filepath.Join(home, k.Value[2:])
-		case !filepath.IsAbs(k.Value):
-			path = filepath.Join(filepath.Dir(d.Path), k.Value)
+			path = filepath.Join(home, path[2:])
+		case !filepath.IsAbs(path):
+			path = filepath.Join(filepath.Dir(d.Path), path)
 		}
 
 		resolve = func() Node {
 			bs, err := d.ReadFile(path)
 			if err != nil {
-				d.Log.Printf("Bad include %#v: %s", k, err)
+				d.Log.Printf("Bad include %#v: %s", path, err)
 				return k
 			}
 			return Block{strings.ToUpper(kind), []string{lang}, d.parseRawInline(string(bs)), nil}
