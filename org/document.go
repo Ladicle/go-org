@@ -14,14 +14,19 @@ package org
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
+
+// defaultRoamDB is path to the roam DB by default.
+const defaultRoamDB = "~/.emacs.d/var/org/org-roam.db"
 
 type Configuration struct {
 	MaxEmphasisNewLines int                                   // Maximum number of newlines inside an emphasis. See org-emphasis-regexp-components newline.
@@ -29,6 +34,7 @@ type Configuration struct {
 	DefaultSettings     map[string]string                     // Default values for settings that are overriden by setting the same key in BufferSettings.
 	Log                 *log.Logger                           // Log is used to print warnings during parsing.
 	ReadFile            func(filename string) ([]byte, error) // ReadFile is used to read e.g. #+INCLUDE files.
+	RoamDB              string                                // Path to the roam DB file.
 }
 
 // Document contains the parsing results and a pointer to the Configuration.
@@ -40,6 +46,7 @@ type Document struct {
 	Macros         map[string]string
 	Links          map[string]string
 	InnerLinks     map[string]InnerLink
+	IDLinks        map[string]string // Link for Raom
 	Nodes          []Node
 	Outline        Outline           // Outline is a Table Of Contents for the document and contains all sections (headline + content).
 	BufferSettings map[string]string // Settings contains all settings that were parsed from keywords.
@@ -91,10 +98,11 @@ func New() *Configuration {
 		DefaultSettings: map[string]string{
 			"TODO":         "TODO | DONE",
 			"EXCLUDE_TAGS": "noexport",
-			"OPTIONS":      "toc:t <:t e:t f:t pri:t todo:t tags:t title:t sec:nil",
+			"OPTIONS":      "toc:t <:t e:t f:t pri:t todo:t tags:t title:nil sec:nil",
 		},
 		Log:      log.New(os.Stderr, "go-org: ", 0),
 		ReadFile: ioutil.ReadFile,
+		RoamDB:   defaultRoamDB,
 	}
 }
 
@@ -129,6 +137,7 @@ func (c *Configuration) Parse(input io.Reader, path string) (d *Document) {
 		BufferSettings: map[string]string{},
 		Links:          map[string]string{},
 		InnerLinks:     map[string]InnerLink{},
+		IDLinks:        map[string]string{},
 		Macros:         map[string]string{},
 		Path:           path,
 	}
@@ -143,7 +152,43 @@ func (c *Configuration) Parse(input io.Reader, path string) (d *Document) {
 	d.tokenize(input)
 	_, nodes := d.parseMany(0, func(d *Document, i int) bool { return i >= len(d.tokens) })
 	d.Nodes = nodes
+
+	c.FetchIDLinks(d)
 	return d
+}
+
+// FetchIDLinks fetch ID links from DB and fill map values of IDLinks in document.
+func (c *Configuration) FetchIDLinks(d *Document) error {
+	dbPath := c.RoamDB
+	if strings.HasPrefix(dbPath, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		dbPath = filepath.Join(home, dbPath[2:])
+	}
+
+	db, err := sql.Open("sqlite3", dbPath)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	stmt, err := db.Prepare("SELECT file FROM nodes WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	var name string
+	for id := range d.IDLinks {
+		err = stmt.QueryRow(fmt.Sprintf("%q", id)).Scan(&name)
+		if err != nil {
+			return err
+		}
+		d.IDLinks[id] = name
+	}
+	return nil
 }
 
 // Silent disables all logging of warnings during parsing.

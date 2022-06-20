@@ -323,6 +323,12 @@ func (d *Document) parseRegularLink(input string, start int) (int, Node) {
 	if len(linkParts) == 2 {
 		protocol = linkParts[0]
 	}
+
+	// build ID link map for org-roam
+	if protocol == "id" {
+		d.IDLinks[link] = ""
+	}
+
 	return consumed, RegularLink{protocol, description, link, false}
 }
 
@@ -385,6 +391,9 @@ func isValidBorderChar(r rune) bool { return !unicode.IsSpace(r) }
 func (l RegularLink) Kind() string {
 	description := String(l.Description)
 	descProtocol, descExt := strings.SplitN(description, ":", 2)[0], path.Ext(description)
+	if l.Protocol == "id" {
+		return "roam"
+	}
 	if ok := descProtocol == "file" || descProtocol == "http" || descProtocol == "https"; ok && imageExtensionRegexp.MatchString(descExt) {
 		return "image"
 	} else if ok && videoExtensionRegexp.MatchString(descExt) {

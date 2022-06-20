@@ -365,11 +365,16 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 		desc string
 		url  = html.EscapeString(l.URL)
 	)
-	if l.Protocol == "file" || l.Protocol == "" {
-		// strip file: protocol
-		if l.Protocol == "file" {
-			url = url[len(l.Protocol)+1:]
-		}
+
+	switch l.Protocol {
+	case "id":
+		url = w.document.IDLinks[l.URL]
+	case "file":
+		url = url[len(l.Protocol)+1:]
+	}
+
+	switch l.Protocol {
+	case "id", "file", "":
 		// resolve relative link
 		if !strings.HasPrefix(url, "/") {
 			url = "../" + url
@@ -388,6 +393,7 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 	if prefix := w.document.Links[l.Protocol]; prefix != "" {
 		url = html.EscapeString(prefix) + strings.TrimPrefix(url, l.Protocol+":")
 	}
+
 	switch l.Kind() {
 	case "image":
 		if l.Description == nil {

@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/alecthomas/chroma v0.8.2
+	github.com/mattn/go-sqlite3 v1.14.13 // indirect
 	github.com/pmezard/go-difflib v1.0.0
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 )
