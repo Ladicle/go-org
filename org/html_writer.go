@@ -373,12 +373,16 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 		if !strings.HasPrefix(url, "/") {
 			url = "/" + url
 		}
-	case "file":
-		url = url[len(l.Protocol)+1:]
-	}
+		// strip .org extension
+		if idx := strings.LastIndex(url, ".org"); idx != -1 {
+			url = url[:idx]
+		}
+		w.log.Printf("convert ID(%s): %s -> %s", l.URL, file, url)
 
-	switch l.Protocol {
-	case "id", "file", "":
+	case "file", "":
+		// strip protocol
+		url = url[len(l.Protocol)+1:]
+
 		// resolve relative link
 		if !strings.HasPrefix(url, "/") {
 			url = "../" + url
@@ -393,9 +397,6 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 		if idx := strings.LastIndex(url, ".org"); idx != -1 {
 			url = url[:idx]
 		}
-	}
-	if prefix := w.document.Links[l.Protocol]; prefix != "" {
-		url = html.EscapeString(prefix) + strings.TrimPrefix(url, l.Protocol+":")
 	}
 
 	switch l.Kind() {

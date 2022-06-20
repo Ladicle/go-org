@@ -167,13 +167,13 @@ func (c *Configuration) Parse(input io.Reader, path string) (d *Document) {
 	}
 	c.ContentDir = conDir
 
-	c.FetchIDLinks(d)
+	d.FetchIDLinks(c.RoamDB)
 	return d
 }
 
 // FetchIDLinks fetch ID links from DB and fill map values of IDLinks in document.
-func (c *Configuration) FetchIDLinks(d *Document) error {
-	db, err := sql.Open("sqlite3", c.RoamDB)
+func (d *Document) FetchIDLinks(path string) error {
+	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return err
 	}
