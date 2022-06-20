@@ -326,6 +326,7 @@ func (d *Document) parseRegularLink(input string, start int) (int, Node) {
 
 	// build ID link map for org-roam
 	if protocol == "id" {
+		link = link[len(protocol)+1:]
 		d.IDLinks[link] = ""
 	}
 
