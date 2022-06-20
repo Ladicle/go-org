@@ -368,7 +368,11 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 
 	switch l.Protocol {
 	case "id":
-		url = w.document.IDLinks[l.URL]
+		file := w.document.IDLinks[l.URL]
+		url = strings.TrimLeft(file, w.document.ContentDir)
+		if !strings.HasPrefix(url, "/") {
+			url = "/" + url
+		}
 	case "file":
 		url = url[len(l.Protocol)+1:]
 	}

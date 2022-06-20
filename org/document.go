@@ -20,13 +20,13 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
 
 // defaultRoamDB is path to the roam DB by default.
 const defaultRoamDB = "~/.emacs.d/var/org/org-roam.db"
+const defaultContentDir = "~/doc/content"
 
 type Configuration struct {
 	MaxEmphasisNewLines int                                   // Maximum number of newlines inside an emphasis. See org-emphasis-regexp-components newline.
@@ -35,6 +35,7 @@ type Configuration struct {
 	Log                 *log.Logger                           // Log is used to print warnings during parsing.
 	ReadFile            func(filename string) ([]byte, error) // ReadFile is used to read e.g. #+INCLUDE files.
 	RoamDB              string                                // Path to the roam DB file.
+	ContentDir          string                                // Path to the contents directory.
 }
 
 // Document contains the parsing results and a pointer to the Configuration.
@@ -100,9 +101,10 @@ func New() *Configuration {
 			"EXCLUDE_TAGS": "noexport",
 			"OPTIONS":      "toc:t <:t e:t f:t pri:t todo:t tags:t title:nil sec:nil",
 		},
-		Log:      log.New(os.Stderr, "go-org: ", 0),
-		ReadFile: ioutil.ReadFile,
-		RoamDB:   defaultRoamDB,
+		Log:        log.New(os.Stderr, "go-org: ", 0),
+		ReadFile:   ioutil.ReadFile,
+		RoamDB:     defaultRoamDB,
+		ContentDir: defaultContentDir,
 	}
 }
 
@@ -153,22 +155,25 @@ func (c *Configuration) Parse(input io.Reader, path string) (d *Document) {
 	_, nodes := d.parseMany(0, func(d *Document, i int) bool { return i >= len(d.tokens) })
 	d.Nodes = nodes
 
+	dbPath, err := convertToAbsHomdir(c.RoamDB)
+	if err != nil {
+		d.Error = err
+	}
+	c.RoamDB = dbPath
+
+	conDir, err := convertToAbsHomdir(c.ContentDir)
+	if err != nil {
+		d.Error = err
+	}
+	c.ContentDir = conDir
+
 	c.FetchIDLinks(d)
 	return d
 }
 
 // FetchIDLinks fetch ID links from DB and fill map values of IDLinks in document.
 func (c *Configuration) FetchIDLinks(d *Document) error {
-	dbPath := c.RoamDB
-	if strings.HasPrefix(dbPath, "~/") {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		dbPath = filepath.Join(home, dbPath[2:])
-	}
-
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", c.RoamDB)
 	if err != nil {
 		return err
 	}
@@ -186,7 +191,7 @@ func (c *Configuration) FetchIDLinks(d *Document) error {
 		if err != nil {
 			return err
 		}
-		d.IDLinks[id] = name
+		d.IDLinks[id] = strings.TrimRight(strings.TrimLeft(name, `"`), `"`)
 	}
 	return nil
 }
