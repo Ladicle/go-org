@@ -193,7 +193,8 @@ func (d *Document) FetchIDLinks(path string) error {
 	for id := range d.IDLinks {
 		err = stmt.QueryRow(fmt.Sprintf("%q", id)).Scan(&name)
 		if err != nil {
-			return err
+			d.Log.Printf("Could not scan file name for id:%s", id)
+			continue
 		}
 		d.IDLinks[id] = strings.TrimRight(strings.TrimLeft(name, `"`), `"`)
 	}
@@ -293,7 +294,7 @@ func (d *Document) parseOne(i int, stop stopFn) (consumed int, node Node) {
 	if consumed != 0 {
 		return consumed, node
 	}
-	d.Log.Printf("Could not parse token %#v: Falling back to treating it as plain text.", d.tokens[i])
+	d.Log.Printf("Could not parse token %#v: Falling back to treating it as plain text in %s.", d.tokens[i], d.Path)
 	m := plainTextRegexp.FindStringSubmatch(d.tokens[i].matches[0])
 	d.tokens[i] = token{"text", len(m[1]), m[2], m}
 	return d.parseOne(i, stop)
