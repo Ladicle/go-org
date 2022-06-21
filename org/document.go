@@ -22,6 +22,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // defaultRoamDB is path to the roam DB by default.
@@ -167,7 +169,9 @@ func (c *Configuration) Parse(input io.Reader, path string) (d *Document) {
 	}
 	c.ContentDir = conDir
 
-	d.FetchIDLinks(c.RoamDB)
+	if err := d.FetchIDLinks(c.RoamDB); err != nil {
+		d.Error = fmt.Errorf("fail to fetch IDLinks: %w", err)
+	}
 	return d
 }
 

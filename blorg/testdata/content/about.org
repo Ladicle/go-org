@@ -4,3 +4,7 @@
 This site is generated from [[https://github.com/niklasfasching/go-org/tree/master/blorg/testdata/content][go-org/blorg/testdata/content]] using the configuration in [[https://github.com/niklasfasching/go-org/blob/master/blorg/testdata/blorg.org][blorg.org]]
 
 #+INCLUDE: "../blorg.org" src org
+
+- =O(N^k)=:  [[id:8BDE4ED7-C356-48E3-B3FC-BCE87227F4AF][ループによる全探索 - Full Search by Loop]]
+- =O(2^N)=:  [[id:39841867-552B-4B2B-AA30-EFCB1C55C3C1][Bit全探索 - Bit Full Search]]
+- =O(logN)=: [[id:FA2A0A96-CA5E-4BAE-9E45-C36797D4259A][二分探索 - Binary Search]] (ソート済である場合)

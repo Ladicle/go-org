@@ -369,15 +369,11 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 	switch l.Protocol {
 	case "id":
 		file := w.document.IDLinks[l.URL]
-		url = strings.TrimLeft(file, w.document.ContentDir)
+		url = strings.TrimPrefix(file, w.document.ContentDir)
 		if !strings.HasPrefix(url, "/") {
 			url = "/" + url
 		}
-		// strip .org extension
-		if idx := strings.LastIndex(url, ".org"); idx != -1 {
-			url = url[:idx]
-		}
-		w.log.Printf("convert ID(%s): %s -> %s", l.URL, file, url)
+		url = strings.TrimSuffix(url, ".org")
 
 	case "file", "":
 		// strip protocol
