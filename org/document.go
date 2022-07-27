@@ -170,7 +170,7 @@ func (c *Configuration) Parse(input io.Reader, path string) (d *Document) {
 	c.ContentDir = conDir
 
 	if err := d.FetchIDLinks(c.RoamDB); err != nil {
-		d.Error = fmt.Errorf("fail to fetch IDLinks: %w", err)
+		d.Log.Printf("fail to fetch IDLinks: %v", err)
 	}
 	return d
 }
