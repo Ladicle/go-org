@@ -27,7 +27,7 @@ import (
 )
 
 // defaultRoamDB is path to the roam DB by default.
-const defaultRoamDB = "~/.emacs.d/var/org/org-roam.db"
+const defaultRoamDB = "~/doc/org-roam.db"
 const defaultContentDir = "~/doc/content"
 
 type Configuration struct {
