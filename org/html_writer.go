@@ -394,7 +394,7 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 			url = url[:idx]
 		}
 	}
-	if strings.HasSuffix(url, "/") {
+	if !strings.HasSuffix(url, "/") {
 		url = url + "/"
 	}
 
