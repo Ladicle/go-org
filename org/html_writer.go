@@ -375,7 +375,6 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 			url = "/" + url
 		}
 		url = strings.TrimSuffix(url, ".org")
-
 	case "file", "":
 		// strip protocol
 		url = url[len(l.Protocol)+1:]
@@ -394,6 +393,9 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 		if idx := strings.LastIndex(url, ".org"); idx != -1 {
 			url = url[:idx]
 		}
+	}
+	if strings.HasSuffix(url, "/") {
+		url = url + "/"
 	}
 
 	switch l.Kind() {
