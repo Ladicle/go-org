@@ -375,6 +375,7 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 			url = "/" + url
 		}
 		url = strings.TrimSuffix(url, ".org")
+		url = strings.ToLower(url)
 	case "file", "":
 		// strip protocol
 		url = url[len(l.Protocol)+1:]
