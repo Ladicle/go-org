@@ -370,7 +370,7 @@ func (w *HTMLWriter) WriteRegularLink(l RegularLink) {
 	case "id":
 		file := w.document.IDLinks[l.URL]
 		url = strings.TrimPrefix(file, w.document.ContentDir)
-		url = strings.TrimPrefix(file, "/Users/ladicle/doc/content") // workaround for roam-db
+		url = strings.TrimPrefix(file, "/Users/ladicle/doc/content") // FIXME: workaround for roam-db
 		if !strings.HasPrefix(url, "/") {
 			url = "/" + url
 		}
